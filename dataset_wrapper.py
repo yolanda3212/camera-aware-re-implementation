@@ -4,6 +4,33 @@ import torchvision
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
+# 12.20 dataset with camera-id and pseudo proxy label
+class ProxyDataset(Dataset):
+    def __init__(self, img_shape, samples, proxy_num):
+        super(ProxyDataset, self).__init__()
+        self.samples = samples
+        self.img_shape = img_shape
+        self.proxy_num = proxy_num
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, index):
+        fname, camid, cluster_label, proxy_label = self.samples[index]
+        h, w = self.img_shape
+        img = Image.open(fname).convert('RGB')
+        img = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(size=(h+10,w+10)),
+            torchvision.transforms.RandomCrop(size=(h,w), pad_if_needed=True, padding_mode='edge'),
+            torchvision.transforms.RandomHorizontalFlip(),
+            torchvision.transforms.RandomVerticalFlip(),
+            torchvision.transforms.ToTensor(),
+            # torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # SpCL config
+            torchvision.transforms.RandomErasing()
+        ])(img)
+
+        return img, cluster_label, proxy_label, camid
+
 # 11.30 evaluation wrapper
 class EvalDataset(Dataset):
     def __init__(self, img_shape, old_dataset, mode='query'):
