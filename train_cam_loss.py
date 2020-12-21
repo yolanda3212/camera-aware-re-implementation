@@ -14,14 +14,14 @@ import tensorboardX
 from torch.utils.data.dataloader import DataLoader
 from collections import OrderedDict
 
-from dataset_wrapper import CustomDataset, RefinedDataset
-from clusterer import Clusterer
-from memory_bank import MemoryBank
-from models.model import ReidNet
-from settings import Settings
+from tools.dataset_wrapper import CustomDataset, RefinedDataset
+from tools.clusterer import Clusterer
 from tools.load_config import load_config
 from tools.init_gpus import init_gpus
-from sampler import ClusterSampler
+from tools.sampler import ClusterSampler
+from models.memory_bank import MemoryBank
+from models.model import ReidNet
+from settings import Settings
 
 from fastreid.solver.lr_scheduler import WarmupMultiStepLR
 from fastreid.data.datasets import VeRi, Market1501

@@ -1,6 +1,9 @@
+import sys
+sys.path.append('/home/ljc/works/fast-reid')
+
 import torch
 import numpy as np
-from  ..dataset_wrapper import ProxyDataset
+from dataset_wrapper import ProxyDataset
 
 __all__ = ['split_for_proxy']
 
@@ -19,6 +22,7 @@ def split_for_proxy(refined_dataset):
 
     cam_set = _get_cams(train_data)
     new_samples, all_proxy_num = _append_proxy_labels(train_data, cam_set, cluster_labels)
+    # print(new_samples, all_proxy_num) # debug
     
     return ProxyDataset(img_shape=refined_dataset.img_shape, samples=new_samples, proxy_num=all_proxy_num)
     
@@ -53,7 +57,8 @@ def _append_proxy_labels(data, cam_set, cluster_labels):
     all_proxy_num = 0
     for camid in cam_set:
         same_cam_samples, proxy_num = _get_same_cam_samples(data, camid, cluster_labels) # NOTE: get proxy num in each camera
-        print(proxy_num)
+        # print(proxy_num) # debug
+        same_cam_samples = [tuple(item) for item in same_cam_samples]
         results.extend(same_cam_samples)
         all_proxy_num += proxy_num
     return results, all_proxy_num
@@ -101,15 +106,14 @@ def _add_proxies(sorted_samples):
 
 
 if __name__ == "__main__":
-    import sys
-    sys.path.append('../..')
-    sys.path.append('/home/ljc/works/fast-reid/projects/learn-fastreid')
     from fastreid.data.datasets import VeRi
     from dataset_wrapper import RefinedDataset
 
 
     veri = VeRi(root='/home/ljc/datasets')
-    veri.train = veri.train[:10] # test with 10 samples
-    veri = RefinedDataset((256,256), old_dataset=veri, good_labels=[1,1,8,0,0,2,2,8,3,3])
+    veri.train = veri.train[:20] # test with 10 samples
+    veri = RefinedDataset((256,256), old_dataset=veri, good_labels=[0,0,0,0,0,1,1,1,2,2,2,2,2,1,1,1,2,2,0,0])
 
-    split_for_proxy(veri)
+    veri = split_for_proxy(veri)
+    print(sorted(veri.samples, key=lambda item: int(item[1].split('_')[-1])))
+    print(veri.proxy_num)

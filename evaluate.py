@@ -7,10 +7,9 @@ from contextlib import contextmanager
 sys.path.append('/home/ljc/works/fast-reid')
 
 from models.model import ReidNet
-from dataset_wrapper import EvalDataset
+from tools.dataset_wrapper import EvalDataset
 from tools.load_config import load_config
 from tools.init_gpus import init_gpus
-from settings import Settings
 from settings import Settings
 from fastreid.evaluation import ReidEvaluator
 from fastreid.data.datasets import VeRi, Market1501
