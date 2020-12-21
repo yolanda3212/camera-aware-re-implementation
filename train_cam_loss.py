@@ -258,7 +258,7 @@ def train(cfg, model, dataset, optimizer, scheduler=None, logger=None, is_contin
 
         # TODO: proxy memory bank initialization
         memory = ProxyMemoryBank(feature_dims=2048, cam_proxy_map=proxy_dataset.cam_proxy_map)
-        memory.init_entities(proxy_dataset, features) # initialize memory bank with proxy centroids, features have been L2-normalized
+        memory.init_storage(proxy_dataset, features) # initialize memory bank with proxy centroids, features have been L2-normalized
 
 
 

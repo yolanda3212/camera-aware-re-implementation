@@ -23,7 +23,7 @@ class ProxyMemoryBank(nn.Module):
         self.momentum = momentum
         self.storage = self._init_storage() # memory bank storage structure
 
-    def init_entities(self, dataset, features):
+    def init_storage(self, dataset, features):
         '''
         Initialize proxy memory bank entities with given dataset and features. Both \
         two arguments share the same order of samples. After the initialization, the\
