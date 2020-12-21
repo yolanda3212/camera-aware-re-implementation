@@ -19,7 +19,9 @@ from tools.clusterer import Clusterer
 from tools.load_config import load_config
 from tools.init_gpus import init_gpus
 from tools.sampler import ClusterSampler
+from tools.split_for_proxy import split_for_proxy
 from models.memory_bank import MemoryBank
+from models.proxy_memory_bank import ProxyMemoryBank
 from models.model import ReidNet
 from settings import Settings
 
@@ -241,33 +243,51 @@ def train(cfg, model, dataset, optimizer, scheduler=None, logger=None, is_contin
         # create non-outlier refined dataset
         print('>>> Refining dataset ...')
         good_dataset = refine_dataset((256,256), dataset, pseudo_labels)
-        sampler = ClusterSampler(good_dataset)
-        sampler = torch.utils.data.BatchSampler(sampler, batch_size=cfg.TRAIN.BATCHSIZE, drop_last=False)
-        # good_dataloader = DataLoader(good_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4)
-        good_dataloader = DataLoader(good_dataset, shuffle=False, batch_sampler=sampler, num_workers=4)
-
-        # memory bank initialization
-        memory = MemoryBank(num_feature_dims=2048, num_samples=num_ids, temp=0.07, momentum=0.2)
-        memory = init_memory_bank(memory, centroids)
 
 
-        # training step
-        for i, (imgs, pids, fnames, vids, camids) in enumerate(good_dataloader):
+
+        # ################################## NOTE: new pipeline below! #################
+        # get pseudo proxy labels
+        proxy_dataset = split_for_proxy(good_dataset)
+
+        import ipdb; ipdb.set_trace()
+
+        # create dataloader with proxy-labeled data
+        dataloader = DataLoader(dataset=proxy_dataset, batch_size=cfg.TRAIN.BATCHSIZE, shuffle=False) # TODO: adopt proxy-balanced sampling
+
+
+        # TODO: proxy memory bank initialization
+        memory = ProxyMemoryBank(feature_dims=2048, cam_proxy_map=proxy_dataset.cam_proxy_map)
+        memory.init_entities(proxy_dataset, features) # initialize memory bank with proxy centroids, features have been L2-normalized
+
+
+
+        # TODO: memory bank construction test
+        import ipdb; ipdb.set_trace()
+        quit()
+
+
+
+        # TODO: camera-aware training pipeline
+        for i, (imgs, cluster_labels, proxy_labels, camids) in enumerate(dataloader):
             if torch.cuda.is_available():
                 imgs = imgs.cuda()
                 memory = memory.cuda()
             optimizer.zero_grad()
             features = model(imgs)
-            loss = memory(features, pids) # update memory bank and compute loss
+            intra_loss, inter_loss = memory(features, camids, proxy_labels) # TODO: intra-cam and inter-cam loss
+            loss = intra_loss + 0.5 * inter_loss # NOTE: total loss with balancing factor
             loss.backward()
             optimizer.step()
 
             if (i + 1) % 50 == 0: # print loss each 50 iters
-                print('[epoch: {}/{}][iter: {}/{}] loss: {}'.format(epoch+1, epochs, i+1, len(good_dataloader), loss))
+                print('[epoch: {}/{}][iter: {}/{}] loss: {}'.format(epoch+1, epochs, i+1, len(dataloader), loss))
             
             # update logger
             if logger is not None:
-                logger.add_scalar('loss', loss.item(), global_step=counter)
+                logger.add_scalar('total_loss', loss.item(), global_step=counter)
+                logger.add_scalar('intra_cam_loss', intra_loss.item(), global_step=counter)
+                logger.add_scalar('inter_cam_loss', inter_loss.item(), global_step=counter)
                 logger.add_scalar('cluster_centroids', memory.num_samples, global_step=counter)
                 logger.add_scalar('lr', optimizer.state_dict()['param_groups'][0]['lr'], global_step=counter)
                 counter += 1
@@ -323,7 +343,7 @@ def main():
     cfg = load_config(Settings.conf)
     dataset = init_dataset(dataset_name='VeRi', dataset_root=cfg.DATASET.PATH, mode='train')
     # dataset = init_dataset(dataset_name='Market1501', dataset_root=cfg.DATASET.PATH, mode='train')
-    # dataset.train = dataset.train[:1000] # shorten list for test
+    dataset.train = dataset.train[:100] # shorten list for test
     
     # initiate model
     model = ReidNet(cfg)

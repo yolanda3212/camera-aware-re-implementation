@@ -2,7 +2,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
-from faiss_rerank import compute_jaccard_distance
+from tools.faiss_rerank import compute_jaccard_distance
 import torch
 import os
 import numpy as np

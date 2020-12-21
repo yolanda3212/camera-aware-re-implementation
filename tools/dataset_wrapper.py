@@ -6,11 +6,19 @@ from torch.utils.data import DataLoader, Dataset
 
 # 12.20 dataset with camera-id and pseudo proxy label
 class ProxyDataset(Dataset):
-    def __init__(self, img_shape, samples, proxy_num):
+    def __init__(self, img_shape, samples, proxy_nums):
         super(ProxyDataset, self).__init__()
         self.samples = samples
         self.img_shape = img_shape
-        self.proxy_num = proxy_num
+        self.proxy_nums = proxy_nums
+        self.cam_proxy_map = self._create_cam_proxy_map()
+
+    def _create_cam_proxy_map(self):
+        res = {}
+        for item in self.proxy_nums:
+            camid, proxy_num = item['camid'], item['proxy_num']
+            res[camid] = proxy_num
+        return res
 
     def __len__(self):
         return len(self.samples)
