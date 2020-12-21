@@ -6,5 +6,13 @@ This work is partially based on [fast-reid toolbox](https://github.com/JDAI-CV/f
 
 ## TODOs
 
-- [x] Baseline model has been implemented.
-- [ ] Camera-aware losses.
+Current branch: baseline
+
+- [x] Model defination
+- [x] Settings and configurations
+- [x] Pseudo cluster label
+- [x] Memory bank
+- [x] Cluster-balanced sampling
+- [x] Warm-up LR scheduler
+
+Baseline model has been implemented.
