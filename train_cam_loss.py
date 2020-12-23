@@ -21,7 +21,7 @@ from tools.init_gpus import init_gpus
 from tools.sampler import ClusterSampler
 from tools.split_for_proxy import split_for_proxy
 from models.memory_bank import MemoryBank
-from models.proxy_memory_bank import ProxyMemoryBank
+from models.proxy_memory_bank import ProxyMemoryBank, get_abs_proxy_labels
 from models.model import ReidNet
 from settings import Settings
 
@@ -250,32 +250,26 @@ def train(cfg, model, dataset, optimizer, scheduler=None, logger=None, is_contin
         # get pseudo proxy labels
         proxy_dataset = split_for_proxy(good_dataset)
 
-        import ipdb; ipdb.set_trace()
-
         # create dataloader with proxy-labeled data
         dataloader = DataLoader(dataset=proxy_dataset, batch_size=cfg.TRAIN.BATCHSIZE, shuffle=False) # TODO: adopt proxy-balanced sampling
 
 
-        # TODO: proxy memory bank initialization
+        # proxy memory bank initialization
         memory = ProxyMemoryBank(feature_dims=2048, cam_proxy_map=proxy_dataset.cam_proxy_map)
         memory.init_storage(proxy_dataset, features) # initialize memory bank with proxy centroids, features have been L2-normalized
 
 
-
-        # TODO: memory bank construction test
-        import ipdb; ipdb.set_trace()
-        quit()
-
-
-
         # TODO: camera-aware training pipeline
         for i, (imgs, cluster_labels, proxy_labels, camids) in enumerate(dataloader):
+            abs_proxy_labels = get_abs_proxy_labels(camids, proxy_labels, proxy_dataset.cam_proxy_map)
             if torch.cuda.is_available():
                 imgs = imgs.cuda()
                 memory = memory.cuda()
+                abs_proxy_labels = abs_proxy_labels.cuda()
             optimizer.zero_grad()
             features = model(imgs)
-            intra_loss, inter_loss = memory(features, camids, proxy_labels) # TODO: intra-cam and inter-cam loss
+            intra_loss, inter_loss = memory(features, camids, proxy_labels, abs_proxy_labels) # TODO: intra-cam and inter-cam loss
+            # import ipdb; ipdb.set_trace()
             loss = intra_loss + 0.5 * inter_loss # NOTE: total loss with balancing factor
             loss.backward()
             optimizer.step()

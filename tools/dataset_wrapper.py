@@ -10,14 +10,22 @@ class ProxyDataset(Dataset):
         super(ProxyDataset, self).__init__()
         self.samples = samples
         self.img_shape = img_shape
-        self.proxy_nums = proxy_nums
-        self.cam_proxy_map = self._create_cam_proxy_map()
+        # self.proxy_nums = proxy_nums
+        self.cam_proxy_map = self._create_cam_proxy_map(proxy_nums)
+        # self.global_cam_indices = self._retrieve_global_cam_indices()
 
-    def _create_cam_proxy_map(self):
+    # def _retrieve_global_cam_indices(self):
+    #     res = []
+    #     for item in self.proxy_nums:
+    #         camid, cam_index = item['camid'], item['cam_index']
+    #         res.append({'camid': camid, 'cam_index':cam_index})
+    #     return res
+
+    def _create_cam_proxy_map(self, proxy_nums):
         res = {}
-        for item in self.proxy_nums:
-            camid, proxy_num = item['camid'], item['proxy_num']
-            res[camid] = proxy_num
+        for item in proxy_nums:
+            camid, proxy_num, cam_index = item['camid'], item['proxy_num'], item['cam_index']
+            res[camid] = {'proxy_num': proxy_num, 'cam_index': cam_index}
         return res
 
     def __len__(self):

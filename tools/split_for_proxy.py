@@ -41,7 +41,7 @@ def _get_cams(data):
     s = set()
     for _, _, camid in data:
         s.add(camid)
-    return sorted(s) # make sure cam set is ordered, easy to debug
+    return sorted(s, key=lambda x: int(x.split('_')[-1])) # make sure cam set is ordered, easy to debug
 
 def _append_proxy_labels(data, cam_set, cluster_labels):
     '''
@@ -57,13 +57,15 @@ def _append_proxy_labels(data, cam_set, cluster_labels):
     '''
     results = []
     proxy_nums = []
+    cam_slot_index = 0 # global camera index
     # all_proxy_num = 0
     for camid in cam_set:
         same_cam_samples, proxy_num = _get_same_cam_samples(data, camid, cluster_labels) # NOTE: get proxy num in each camera
         # print(proxy_num) # debug
         same_cam_samples = [tuple(item) for item in same_cam_samples]
         results.extend(same_cam_samples)
-        proxy_nums.append({'camid': camid, 'proxy_num': proxy_num})
+        proxy_nums.append({'camid': camid, 'proxy_num': proxy_num, 'cam_index': cam_slot_index})
+        cam_slot_index += proxy_num
         # all_proxy_num += proxy_num
     return results, proxy_nums
 
