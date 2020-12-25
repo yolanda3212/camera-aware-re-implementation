@@ -226,7 +226,7 @@ def train(cfg, model, dataset, optimizer, scheduler=None, logger=None, is_contin
         print('>>> Extracting global features ...')
         features, v_labels, cam_labels = extract_global_features(
             img_shape=(256,256),
-            batch_size=batch_size, workers=4,
+            batch_size=batch_size, workers=8,
             model=model, dataset=dataset, mode='train',
             is_cuda=torch.cuda.is_available()
         )
@@ -244,10 +244,10 @@ def train(cfg, model, dataset, optimizer, scheduler=None, logger=None, is_contin
         sampler = ClusterSampler(good_dataset)
         sampler = torch.utils.data.BatchSampler(sampler, batch_size=cfg.TRAIN.BATCHSIZE, drop_last=False)
         # good_dataloader = DataLoader(good_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4)
-        good_dataloader = DataLoader(good_dataset, shuffle=False, batch_sampler=sampler, num_workers=4)
+        good_dataloader = DataLoader(good_dataset, shuffle=False, batch_sampler=sampler, num_workers=8)
 
         # memory bank initialization
-        memory = MemoryBank(num_feature_dims=2048, num_samples=num_ids, temp=0.07, momentum=0.2)
+        memory = MemoryBank(num_feature_dims=2048, num_samples=num_ids, temp=0.07, momentum=0.02)
         memory = init_memory_bank(memory, centroids)
 
 
@@ -330,8 +330,9 @@ def main():
     if len(Settings.gpu_ids.split(',')) > 1:
         print('>>> Using multi-GPUs, enable DataParallel')
         model = torch.nn.DataParallel(model)
-    optim = torch.optim.SGD(params=model.parameters(), lr=cfg.TRAIN.LR, momentum=0.8)
-    scheduler = WarmupMultiStepLR(optim, milestones=[29,49], gamma=0.1, warmup_iters=10, warmup_method='linear')
+    # optim = torch.optim.SGD(params=model.parameters(), lr=cfg.TRAIN.LR, momentum=0.8)
+    optim = torch.optim.Adam(params=model.parameters(), lr=cfg.TRAIN.LR)
+    scheduler = WarmupMultiStepLR(optim, milestones=[20,40], gamma=0.1, warmup_factor=0.01, warmup_iters=10, warmup_method='linear')
 
     # training monitor
     if len(cfg.TRAIN.LOG_PATH) != 0:

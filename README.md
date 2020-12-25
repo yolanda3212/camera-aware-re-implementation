@@ -16,3 +16,7 @@ Current branch: baseline
 - [x] Warm-up LR scheduler
 
 Baseline model has been implemented.
+
+## Re-id Performance
+
+![baseline_performance](./baseline_performance.png)

@@ -28,7 +28,7 @@ class EvalDataset(Dataset):
         img = torchvision.transforms.Compose([
             torchvision.transforms.Resize(size=(h,w)),
             torchvision.transforms.ToTensor(),
-            # torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # SpCL config
+            torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # SpCL config
         ])(img)
 
         return {'images': img, 'targets':vid, 'camids':camid}
@@ -57,7 +57,7 @@ class RefinedDataset(Dataset):
             torchvision.transforms.RandomHorizontalFlip(),
             torchvision.transforms.RandomVerticalFlip(),
             torchvision.transforms.ToTensor(),
-            # torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # SpCL config
+            torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # SpCL config
             torchvision.transforms.RandomErasing()
         ])(img)
 
@@ -95,6 +95,6 @@ class CustomDataset(Dataset):
         img = torchvision.transforms.Compose([
             torchvision.transforms.Resize(size=(h,w)),
             torchvision.transforms.ToTensor(),
-            # torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # SpCL config
+            torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # SpCL config
         ])(img)
         return img, fname, vid, camid

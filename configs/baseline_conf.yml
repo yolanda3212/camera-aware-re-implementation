@@ -22,16 +22,16 @@ TRAIN:
   EPOCHS: 50
   BATCHSIZE: 32
   LR: 0.00035
-  WEIGHT_DECAY: 0
+  WEIGHT_DECAY: 0.0005
   SAVE_INTERVAL: 10
   PRETRAINED_PATH: ""
-  CHECKPOINT_PATH: "/home/ljc/works/fast-reid/projects/learn-fastreid/checkpoints/12.14-1555-veri-augment-sampler-normalized"
-  LOG_PATH: "/home/ljc/works/fast-reid/projects/learn-fastreid/logs/12.14-1555-veri-augment-sampler-normalized"
+  CHECKPOINT_PATH: "/home/ljc/works/fast-reid/projects/learn-fastreid/checkpoints/12.24-1844-veri"
+  LOG_PATH: "/home/ljc/works/fast-reid/projects/learn-fastreid/logs/12.24-1844-veri"
   CLUSTER_VIS_PATH: ""
 
 # evaluation settings
 TEST:
-  PRETRAINED_MODEL: "/home/ljc/works/fast-reid/projects/learn-fastreid/checkpoints/12.13-1731-veri-augment-sampler/backbone-epoch-50.pth"
+  PRETRAINED_MODEL: "/home/ljc/works/fast-reid/projects/learn-fastreid/checkpoints/12.24-1844-veri/backbone-epoch-50.pth"
   AQE:
     ENABLED: True
     QE_TIME: 1
